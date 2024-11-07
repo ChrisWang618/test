@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>商品訂購表單</title>
+    <script>
+        function addProductRow(category) {
+            const categoryList = document.getElementById(`${category}List`);
+            const newRow = document.createElement("div");
+            newRow.className = "productRow";
+
+            const productSelect = document.createElement("select");
+            productSelect.name = `${category}_product[]`;
+
+            if (category === "health") {
+                productSelect.innerHTML = `
+                    <option value="蜂蜜飲4盒組共240包 (台灣帳號無法購買)">蜂蜜飲4盒組共240包</option>
+                    <option value="優惠四入組 艾多美 rTG純素海藻omega3膠囊">艾多美 rTG純素海藻omega3膠囊</option>
+                    <!-- Add other health product options -->
+                `;
+            } else if (category === "skincare") {
+                productSelect.innerHTML = `
+                    <option value="六部曲">六部曲</option>
+                    <option value="五件組">五件組</option>
+                    <!-- Add other skincare product options -->
+                `;
+            }
+
+            const quantityInput = document.createElement("input");
+            quantityInput.type = "number";
+            quantityInput.name = `${category}_quantity[]`;
+            quantityInput.min = "1";
+            quantityInput.placeholder = "數量";
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.innerText = "刪除";
+            deleteButton.onclick = function() {
+                categoryList.removeChild(newRow);
+            };
+
+            newRow.appendChild(productSelect);
+            newRow.appendChild(quantityInput);
+            newRow.appendChild(deleteButton);
+            categoryList.appendChild(newRow);
+        }
+
+        function submitForm() {
+    const formData = new FormData(document.getElementById('orderForm'));
+
+    // 直接將陣列轉為字符串
+    const healthProducts = formData.getAll("health_product[]").join(','); 
+    const skincareProducts = formData.getAll("skincare_product[]").join(',');
+
+    // 設置新的值
+    formData.set("health_product[]", healthProducts); 
+    formData.set("skincare_product[]", skincareProducts);
+
+    fetch("https://script.google.com/macros/s/AKfycbzhWfrzMr5aJt6-uZZwVm6vo4Q3DX46riRiZLPTkKa_TdtgeP0Oc4Of1JmXP34MdPVP0Q/exec", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.text())
+    .then(result => alert(result))
+    .catch(error => console.error("錯誤:", error));
+}
+
+    </script>
+</head>
+<body>
+    <form id="orderForm" onsubmit="submitForm(); return false;">
+
+        <h2>商品訂購表單</h2>
+        
+        <!-- Customer Info -->
+        <label>帳號: <input type="text" name="name" required></label><br>
+        <label>密碼: <input type="text" name="password" required></label><br>
+        <label>PV日期: <input type="text" name="rdate" required></label><br>
+        <label>收件人: <input type="text" name="rname" required></label><br>
+        <label>電話: <input type="text" name="rphone" required></label><br>
+        <label>地址: <input type="text" name="raddress" required></label><br>
+        <label>Line名稱: <input type="text" name="rlinename" required></label><br><br>
+
+        <!-- Health Food Category -->
+        <h3>健康食品</h3>
+        <div id="healthList">
+            <div class="productRow">
+                <label>商品: <select name="health_product[]">
+                    <option value="蜂蜜飲4盒組共240包 (台灣帳號無法購買)">蜂蜜飲4盒組共240包</option>
+                    <option value="優惠四入組 艾多美 rTG純素海藻omega3膠囊">艾多美 rTG純素海藻omega3膠囊</option>
+                    <!-- Add other health product options -->
+                </select></label>
+                <label>數量: <input type="number" name="health_quantity[]" min="1" placeholder="數量"></label>
+            </div>
+        </div>
+        <button type="button" onclick="addProductRow('health')">添加健康食品</button><br><br>
+
+        <!-- Skincare Category -->
+        <h3>保養品</h3>
+        <div id="skincareList">
+            <div class="productRow">
+                <label>商品: <select name="skincare_product[]">
+                    <option value="六部曲">六部曲</option>
+                    <option value="五件組">五件組</option>
+                    <!-- Add other skincare product options -->
+                </select></label>
+                <label>數量: <input type="number" name="skincare_quantity[]" min="1" placeholder="數量"></label>
+            </div>
+        </div>
+        <button type="button" onclick="addProductRow('skincare')">添加保養品</button><br><br>
+
+        <button type="submit">提交訂單</button>
+    </form>
+</body>
+</html>
